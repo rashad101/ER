@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 thesaurus
 SPARQLWrapper
+=======
+thesaurus
+SPARQLWrapper
+>>>>>>> 8b44787d74fbf8a1ae57b23a230331c029cb29e1
 textdistance
