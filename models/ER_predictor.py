@@ -45,6 +45,3 @@ def split_data():
         data_w.writerows(test_data)
 
 split_data()
-=======
-import numpy as np
->>>>>>> 8b44787d74fbf8a1ae57b23a230331c029cb29e1
