@@ -1,6 +1,8 @@
 import json
 from thesaurus import Word
 from collections import Counter
+import textdistance
+import numpy as np
 
 def count_ontology_classes():
     with open('../data/FullyAnnotated_LCQuAD_new.json') as f:
@@ -33,16 +35,29 @@ def count_ontology_classes():
         return class_count
 
 def write_dbpedia_relations():
-    all_rel =[]
+    all_relations_with_label = {}
+    uri_relations = []
     write_to_file = open("../data/all_DBpedia_relations.txt", "w+")
+    
     with open('../data/dbontologyindex1.json') as f:
         for line in f:
             ln = line.strip()
             if "mergedLabel" in ln:
-                relation = ln[ln.rfind("mergedLabel")+len("mergedLabel")+3:ln.find("uri")-3]
-                if relation not in all_rel and len(relation)>0:
-                    all_rel.append(relation.strip())
-                    write_to_file.write(relation.strip()+"\n")
+                uri = ln[ln.find("uri")+len("uri")+3:ln.find("urianalyzed")-3]
+                uri_rel = uri[uri.rfind("/")+1:]
+                label = ln[ln.rfind("mergedLabel")+len("mergedLabel")+3:ln.find("uri")-3]
+
+                if uri_rel in uri_relations:
+                    if label not in all_relations_with_label[uri_rel]:
+                        all_relations_with_label[uri_rel].append(label)
+                else:
+                    uri_relations.append(uri_rel)
+                    all_relations_with_label[uri_rel] = []
+                    all_relations_with_label[uri_rel].append(label)
+
+
+    with open('../data/all_relations_with_label.json', 'w') as outfile:
+        json.dump([all_relations_with_label], outfile)
     write_to_file.close()
 
 
@@ -51,15 +66,41 @@ def find_similar_relations_using_thesaurus(word):
     return w.synonyms()
 
 
+# Returns a dictionary where key: value == relation: list_of_labels
+def load_DBpedia_relations():
+    with open('../data/all_relations_with_label.json') as f:
+        relations = json.load(f)
+        relations = relations[0]
+        return relations
 
-def build_dataset():
-    # get top 5 relations
+def build_train_test_data():
+    # load dataset
 
-    # get top 5 relations related to the entity
+    # load all dbpedia relations
+    relations = load_DBpedia_relations()
+
+    # get top 5 relations from dbpedia relations (extracted from dbpedia uri)
+
+    # get top 5 relations related to the entity from dbpedia relations which are extracted from dbpedia relations
+
+    # make a set( 1 exact relation + 5 similar relations from dbpedia + 5  similar relations from dbpedia for that entity
 
     pass
+
+
+def unique_finder():
+    #TEST
+    print(textdistance.cosine("father of","uncle"))
+    print(textdistance.cosine("father", "mother"))
+    a = [2,4,6,2,5,7,2.3,12,31.39,3]
+    a = np.array(a)
+    print(np.argmax(a))
+    print(a[np.argmax(a)])
 
 
 #count_ontology_classes()
 #write_dbpedia_relations()
 #find_similar_relations_using_thesaurus()
+
+#unique_finder()
+load_DBpedia_relations()
