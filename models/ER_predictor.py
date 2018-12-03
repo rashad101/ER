@@ -6,7 +6,7 @@ from numpy import array
 import numpy as np
 from keras.preprocessing.text import one_hot
 from  keras.datasets import imdb
-from keras.models import Sequential
+from keras.models import Sequential, model_from_json
 from keras.layers import Dense
 from keras.layers import LSTM,Bidirectional
 from keras.layers.embeddings import Embedding
@@ -45,7 +45,7 @@ def f1(y_true, y_pred):
 # load embedding as a dict
 def load_embedding(filename):
 	# load embedding into memory, skip first line
-	file = open(filename,'r')
+	file = open(filename,'r', encoding="utf-8")
 	lines = file.readlines()
 	file.close()
 	# create a map of words to vectors
@@ -144,7 +144,6 @@ def load_data():
     return (X_train,y_train,X_test,y_test)
 
 #split_data()
-top_words = 88588
 
 print("Loading data .....")
 X_train, y_train,X_test, y_test = load_data()
@@ -172,7 +171,7 @@ raw_embedding = load_embedding('../embedding/glove.6B.300d.txt')
 # get vectors in the right order
 embedding_vectors = get_weight_matrix(raw_embedding, word_to_id)
 # create the embedding layer
-embedding_layer = Embedding(top_words, 300, weights=[embedding_vectors], input_length=max_text_length, trainable=False)
+embedding_layer = Embedding(vocab_size, 300, weights=[embedding_vectors], input_length=max_text_length, trainable=False)
 
 
 # create the model
@@ -189,6 +188,15 @@ model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=5, batch_si
 # Final evaluation of the model
 scores = model.evaluate(X_test, y_test, verbose=0)
 
+# serialize model to JSON
+model_json = model.to_json()
+with open("checkpoints/ER_model.json", "w") as json_file:
+    json_file.write(model_json)
+# serialize weights to HDF5
+model.save_weights("checkpoints/ER_wights.h5")
+print("Saved model to disk")
+
+
 print("Accuracy: %.2f%%" % (scores[1]*100))
 
 entity = "Barack Obama"
@@ -199,3 +207,26 @@ for review in [entity,relation]:
         tmp.append(word_to_id[word])
     tmp_padded = sequence.pad_sequences([tmp], maxlen=max_text_length)
     print("%s . Entity: %s" % (review,model.predict(array([tmp_padded][0]))[0][0]))
+
+
+
+#For Testing with loaded model
+
+'''
+# load json and create model
+json_file = open('checkpoints/ER_model.json', 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+loaded_model = model_from_json(loaded_model_json)
+
+
+# load weights into new model
+loaded_model.load_weights("checkpoints/ER_wights.h5")
+print("Loaded model from disk")
+
+# evaluate loaded model on test data
+loaded_model.compile(loss='binary_crossentropy',optimizer='adam', metrics=['accuracy',f1])
+score = loaded_model.evaluate(X_test, y_test, verbose=0)
+
+print("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1] * 100))
+'''
