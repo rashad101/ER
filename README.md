@@ -10,6 +10,6 @@ For embedding download glove.6B.300d.txt from https://nlp.stanford.edu/projects/
 ## Models
 
 #### Entity-Relation Predictor
-You can use pre-trained model ER_model.json, ER_weight.h5 for Entity-Relation. For that download ER_weight.h5 file from here (link to be updated) and copy it inside /models/checkpoints/ directory.
+You can use pre-trained model ER_model.json, ER_weight.h5 for Entity-Relation. For that download ER_weight.h5 file from here (https://www.dropbox.com/s/qwk93abdf4whjux/ER_wights.h5?dl=0) and copy it inside /models/checkpoints/ directory.
 
 ## Performance
