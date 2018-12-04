@@ -1,6 +1,10 @@
 # ER
 ## Requirements
 Pyton 3.6
+Keras 2.2.4
+thesaurus
+SPARQLWrapper
+textdistance
 
 ## Pre-processing
 Download ER_main.csv, ER_train.csv, ER_test.csv from here (https://drive.google.com/open?id=1RDreKI4osOWcXm4cOSfK-avxZonqGNEZ) and copy it inside "data/" directory.
