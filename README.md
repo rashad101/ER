@@ -7,6 +7,6 @@ For embedding download glove.6B.300d.txt from https://nlp.stanford.edu/projects/
 
 ## Models
 
-###Entity Relation Predictor
+### Entity Relation Predictor
 
 ## Performance
