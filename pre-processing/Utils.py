@@ -15,12 +15,12 @@ def load_data():
                 subject = subject_uri[subject_uri.rfind("/")+1:]
 
                 object_uri = dict["object"]
-                object = object_uri[object_uri.rfind("/")+1:]
+                object_ = object_uri[object_uri.rfind("/")+1:]
 
                 predicate_uri = dict["predicate"]
                 predicate = predicate_uri[predicate_uri.rfind("/")+1:]
 
-                triple_list.append([subject,predicate,object])
+                triple_list.append([subject,predicate,object_])
 
         return triple_list
 
