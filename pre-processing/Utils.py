@@ -3,6 +3,8 @@ from thesaurus import Word
 from collections import Counter
 import textdistance
 import numpy as np
+import heapq
+from SPARQLWrapper import SPARQLWrapper, JSON
 
 #returns a list of triple-list
 def load_data():
@@ -97,38 +99,65 @@ def load_DBpedia_relations():
         return relations
 
 def build_data():
+
     # load dataset (triples)
     data = load_data()
-    print(len(data))
+
     # load all dbpedia relations
     relations = load_DBpedia_relations()
     relations = list(relations.keys())
-    print(len(relations))
-
-    # get top 5 relations from dbpedia relations (extracted from dbpedia uri)
 
 
-    # get top 5 relations related to the entity from dbpedia relations which are extracted from dbpedia relations
+    for i in range(len(data)):
+        sub = data[i][0]
+        pred = data[i][1]
+        obj = data[i][2]
 
-    # make a set( 1 exact relation + 5 similar relations from dbpedia + 5  similar relations from dbpedia for that entity
+        relation_set = set()
 
+        # get top 5 relations from dbpedia relations (extracted from dbpedia uri)
+        similarity = []
+        for rel in relations:
+            if rel!=pred:
+                similarity.append({"rel":rel, "similarity": textdistance.cosine(rel,pred)})
+
+        top5_rel = heapq.nlargest(5, similarity, key=lambda s: s['similarity'])
+
+        relation_set.add(pred)
+
+        for rel in top5_rel:
+            relation_set.add(rel['rel'])
+
+        #print(relation_set)
+
+        # get top 5 relations related to the entity from dbpedia relations which are extracted from dbpedia relations
+        # make a set ( 1 exact relation + 5 similar relations from dbpedia + 5  similar relations from dbpedia for that entity)
     pass
 
 
-def unique_finder():
-    #TEST
-    print(textdistance.cosine("father of","uncle"))
-    print(textdistance.cosine("father", "mother"))
-    a = [2,4,6,2,5,7,2.3,12,31.39,3]
-    a = np.array(a)
-    print(np.argmax(a))
-    print(a[np.argmax(a)])
+def testing_func():
+    sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+    pred = "Barack_Obama"
+    sparql.setQuery("SELECT ?rel where { ?obj ?rel dbr:"+pred+"}")
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+    #print(sparql.query())
+    relations = []
+    print(results)
 
+    results = results['results']['bindings']
+    print(results)
+    link_set = set()
+    for data in results:
+        rel_uri = data['rel']['value']
+        link_set.add(rel_uri)
+    print(link_set)
 
 #count_ontology_classes()
 #write_dbpedia_relations()
 #find_similar_relations_using_thesaurus()
 
-#unique_finder()
-build_data()
+
+testing_func()
+#build_data()
 #load_DBpedia_relations()
