@@ -4,6 +4,27 @@ from collections import Counter
 import textdistance
 import numpy as np
 
+#returns a list of triple-list
+def load_data():
+    with open('../data/FullyAnnotated_LCQuAD_new.json') as f:
+        data = json.load(f)
+        triple_list = []
+        for i in range(len(data)):
+            for dict in data[i]:
+                subject_uri = dict["subject"]
+                subject = subject_uri[subject_uri.rfind("/")+1:]
+
+                object_uri = dict["object"]
+                object = object_uri[object_uri.rfind("/")+1:]
+
+                predicate_uri = dict["predicate"]
+                predicate = predicate_uri[predicate_uri.rfind("/")+1:]
+
+                triple_list.append([subject,predicate,object])
+
+        return triple_list
+
+
 def count_ontology_classes():
     with open('../data/FullyAnnotated_LCQuAD_new.json') as f:
         data = json.load(f)
@@ -33,6 +54,8 @@ def count_ontology_classes():
         print('total class count: {}'.format(class_count))
         print('total questions: {}'.format(total_q))
         return class_count
+
+
 
 def write_dbpedia_relations():
     all_relations_with_label = {}
@@ -73,13 +96,17 @@ def load_DBpedia_relations():
         relations = relations[0]
         return relations
 
-def build_train_test_data():
-    # load dataset
-
+def build_data():
+    # load dataset (triples)
+    data = load_data()
+    print(len(data))
     # load all dbpedia relations
     relations = load_DBpedia_relations()
+    relations = list(relations.keys())
+    print(len(relations))
 
     # get top 5 relations from dbpedia relations (extracted from dbpedia uri)
+
 
     # get top 5 relations related to the entity from dbpedia relations which are extracted from dbpedia relations
 
@@ -103,4 +130,5 @@ def unique_finder():
 #find_similar_relations_using_thesaurus()
 
 #unique_finder()
-load_DBpedia_relations()
+build_data()
+#load_DBpedia_relations()
