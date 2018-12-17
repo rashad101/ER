@@ -2,7 +2,10 @@ import json
 from thesaurus import Word
 from collections import Counter
 import textdistance
+from nltk.tokenize import WordPunctTokenizer
 import numpy as np
+import nltk
+import re
 import heapq
 from SPARQLWrapper import SPARQLWrapper, JSON
 
@@ -102,12 +105,13 @@ def build_data():
 
     # load dataset (triples)
     data = load_data()
+    total = len(data)
 
     # load all dbpedia relations
     relations = load_DBpedia_relations()
     relations = list(relations.keys())
-
-
+    er_n_list = []
+    j = 0
     for i in range(len(data)):
         sub = data[i][0]
         pred = data[i][1]
@@ -128,36 +132,67 @@ def build_data():
         for rel in top5_rel:
             relation_set.add(rel['rel'])
 
-        #print(relation_set)
 
         # get top 5 relations related to the entity from dbpedia relations which are extracted from dbpedia relations
+        relations_for_entity = get_relations(sub)
+
+        similarity = []
+        for rel in relations_for_entity:
+            if rel!=pred:
+                similarity.append({"rel":rel, "similarity": textdistance.cosine(rel,pred)})
+
+        top5_er = heapq.nlargest(5,similarity, key= lambda s: s['similarity'])
+
+        for rel in top5_er:
+            relation_set.add(rel['rel'])
+
         # make a set ( 1 exact relation + 5 similar relations from dbpedia + 5  similar relations from dbpedia for that entity)
-    pass
+        d = {}
+        d["subject"] = sub
+        d["predicate"] = pred
+        d["list_of_relations"] = list(relation_set)
+
+        er_n_list.append(d)
+        j+=1
+        if j%30==0:
+            percent = (j/total)*100.0
+            print("done %.2f%%"%percent)
+
+    with open('../data/ER_n_relList.json', 'w') as outfile:
+        json.dump([er_n_list], outfile)
 
 
-def testing_func():
+def get_relations(entity):
     sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-    pred = "Barack_Obama"
-    sparql.setQuery("SELECT ?rel where { ?obj ?rel dbr:"+pred+"}")
+    entity = remove_punct(entity)
+    entity = "_".join(entity.split(" "))
+    entity = entity.replace("__","_")
+    if entity[len(entity)-1]=="_":
+        entity= entity[0:len(entity)-1]
+    #print("entity is :  {}".format(entity))
+    sparql.setQuery("SELECT distinct ?rel where { ?obj ?rel dbr:"+entity+"}")
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
-    #print(sparql.query())
-    relations = []
-    print(results)
 
     results = results['results']['bindings']
-    print(results)
     link_set = set()
     for data in results:
         rel_uri = data['rel']['value']
-        link_set.add(rel_uri)
-    print(link_set)
-
-#count_ontology_classes()
-#write_dbpedia_relations()
-#find_similar_relations_using_thesaurus()
+        rel = rel_uri[rel_uri.rfind("/")+1:]
+        link_set.add(rel)
+    return  list(link_set)
 
 
-testing_func()
-#build_data()
-#load_DBpedia_relations()
+def remove_punct(sentence, keep_apostrophe = False):
+    sentence = sentence.strip()
+    if keep_apostrophe:
+        PATTERN = r'[?|$|&|*|%|@|(|)|~]'
+        filtered_sentence = re.sub(PATTERN, r' ', sentence)
+    else :
+        PATTERN = r'[^a-zA-Z0-9]'
+        filtered_sentence = re.sub(PATTERN, r' ', sentence)
+    return(filtered_sentence)
+
+
+
+build_data()
