@@ -1,8 +1,10 @@
-<<<<<<< HEAD
+python=3.6
+Keras 2.2.4
 thesaurus
 SPARQLWrapper
-=======
-thesaurus
-SPARQLWrapper
->>>>>>> 8b44787d74fbf8a1ae57b23a230331c029cb29e1
 textdistance
+fasttext
+sklearn
+pandas
+seaborn
+matplotlib
