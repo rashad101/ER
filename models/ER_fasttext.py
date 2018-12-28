@@ -22,28 +22,6 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 import os, re, csv, math, codecs
 
-'''
-rows=[["data","type"]]
-rows.append(['Rony',0])
-rows.append(['capital of',1])
-rows.append(['Barack Obama',0])
-rows.append(['president',1])
-rows.append(['Germany',0])
-rows.append(['vice president',1])
-rows.append(['USA',0])
-rows.append(['biggest',1])
-rows.append(['Berlin',0])
-
-
-file = open("data/train.csv","w", encoding="utf-8")
-w = csv.writer(file)
-wr = w.writerows(rows)
-file.close()
-'''
-
-
-
-
 rows=[["data","type"]]
 rows.append(['robert',"E"])
 rows.append(['district of',"R"])
