@@ -22,6 +22,28 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 import os, re, csv, math, codecs
 
+'''
+rows=[["data","type"]]
+rows.append(['Rony',0])
+rows.append(['capital of',1])
+rows.append(['Barack Obama',0])
+rows.append(['president',1])
+rows.append(['Germany',0])
+rows.append(['vice president',1])
+rows.append(['USA',0])
+rows.append(['biggest',1])
+rows.append(['Berlin',0])
+
+
+file = open("data/train.csv","w", encoding="utf-8")
+w = csv.writer(file)
+wr = w.writerows(rows)
+file.close()
+'''
+
+
+
+
 rows=[["data","type"]]
 rows.append(['robert',"E"])
 rows.append(['district of',"R"])
@@ -68,36 +90,14 @@ def normalize(s):
     s = s.replace('9', ' nine ')
     return s
 
-def f1(y_true, y_pred):
-
-    def recall(y_true, y_pred):
-        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-        possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-        recall = true_positives / (possible_positives + K.epsilon())
-        print("recall: {}".format(recall))
-        return recall
-
-    def precision(y_true, y_pred):
-        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-        predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-        precision = true_positives / (predicted_positives + K.epsilon())
-        return precision
-
-    precision = precision(y_true, y_pred)
-    recall = recall(y_true, y_pred)
-    print("precision: {}".format(precision))
-    return 2*((precision*recall)/(precision+recall+K.epsilon()))
-
-
-
 from subprocess import check_output
 print(check_output(["ls", "data"]).decode("utf8"))
 
 
 
 #load data
-train_df = pd.read_csv('data/train_lc.csv', sep=',', header=0)
-test_df = pd.read_csv('data/test.csv', sep=',', header=0)
+train_df = pd.read_csv('data/ER_main_v2.csv', sep=',', header=0)
+test_df = pd.read_csv('data/lcquad_ER.csv', sep=',', header=0)
 test_df = test_df.fillna('_NA_')
 
 print("num train: ", train_df.shape[0])
@@ -113,6 +113,7 @@ train_df['data'] = [normalize(w) for w in train_df['data']]
 print(y_test)
 
 
+
 #visualize word distribution
 train_df['doc_len'] = train_df['data'].apply(lambda words: len(words.split(" ")))
 max_seq_len = np.round(train_df['doc_len'].mean() + train_df['doc_len'].std()).astype(int)
@@ -120,6 +121,7 @@ sns.distplot(train_df['doc_len'], hist=True, kde=True, color='b', label='doc len
 plt.axvline(x=max_seq_len, color='k', linestyle='--', label='max len')
 plt.title('data length'); plt.legend()
 #plt.show()
+
 
 
 raw_docs_train = train_df['data'].tolist()
@@ -132,7 +134,7 @@ for doc in tqdm(raw_docs_train):
     tokens = tokenizer.tokenize(doc)
     filtered = [word for word in tokens if word not in stop_words]
     processed_docs_train.append(" ".join(filtered))
-
+#end for
 
 processed_docs_test = []
 for doc in tqdm(raw_docs_test):
@@ -140,7 +142,7 @@ for doc in tqdm(raw_docs_test):
     filtered = [word for word in tokens if word not in stop_words]
     processed_docs_test.append(" ".join(filtered))
 print(processed_docs_test)
-
+#end for
 
 print("tokenizing input data...")
 tokenizer = Tokenizer(num_words=MAX_NB_WORDS, lower=True, char_level=True)
@@ -156,6 +158,14 @@ word_seq_train = sequence.pad_sequences(word_seq_train, maxlen=max_seq_len)
 word_seq_test = sequence.pad_sequences(word_seq_test, maxlen=max_seq_len)
 print("word_eq_test",word_seq_test)
 print(y_test)
+
+
+
+
+
+
+
+
 
 
 #load embeddings
@@ -205,6 +215,28 @@ print('number of null word embeddings: %d' % np.sum(np.sum(embedding_matrix, axi
 
 
 
+def f1(y_true, y_pred):
+
+    def recall(y_true, y_pred):
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+        recall = true_positives / (possible_positives + K.epsilon())
+        print("recall: {}".format(recall))
+        return recall
+
+    def precision(y_true, y_pred):
+        true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+        predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+        precision = true_positives / (predicted_positives + K.epsilon())
+        return precision
+
+    precision = precision(y_true, y_pred)
+    recall = recall(y_true, y_pred)
+    print("precision: {}".format(precision))
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
+
+
+
 embedding_layer =Embedding(nb_words, embed_dim, weights=[embedding_matrix], input_length=max_seq_len, trainable=False)
 
 # Defining model
@@ -242,7 +274,8 @@ for text in alist:
     #print(prediction)
     print('prediction',prediction2)
     y_classes = prediction2.argmax(axis=-1)
-    #print(y_classes)
+    print(y_classes)
+    print(prediction2.argmax())
     print(prediction2[0][0])
 print(model.metrics_names)
 
