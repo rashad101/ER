@@ -256,6 +256,14 @@ hist = model.fit(word_seq_train, y_train, batch_size=batch_size, epochs=num_epoc
 
 
 y_test = model.evaluate(word_seq_test,y_test)
+
+model_json = model.to_json()
+with open("checkpoints/ER_model_fasttext.json", "w") as json_file:
+    json_file.write(model_json)
+# serialize weights to HDF5
+model.save_weights("checkpoints/ER_fasttext_wights.h5")
+print("Saved model to disk")
+
 print(word_seq_test)
 print("y test",y_test)
 text = "president of"
