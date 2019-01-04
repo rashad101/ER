@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 import keras
 from keras import optimizers
 from keras import backend as K
@@ -22,46 +21,10 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 import os, re, csv, math, codecs
 
-'''
-rows=[["data","type"]]
-rows.append(['Rony',0])
-rows.append(['capital of',1])
-rows.append(['Barack Obama',0])
-rows.append(['president',1])
-rows.append(['Germany',0])
-rows.append(['vice president',1])
-rows.append(['USA',0])
-rows.append(['biggest',1])
-rows.append(['Berlin',0])
-
-
-file = open("data/train.csv","w", encoding="utf-8")
-w = csv.writer(file)
-wr = w.writerows(rows)
-file.close()
-'''
-
-
-
-
-rows=[["data","type"]]
-rows.append(['robert',"E"])
-rows.append(['district of',"R"])
-rows.append(['Barack Obama',"E"])
-rows.append(['railway',"R"])
-rows.append(['largest river',"R"])
-
-
-file = open("data/test.csv","w", encoding="utf-8")
-w = csv.writer(file)
-wr = w.writerows(rows)
-file.close()
-
-
 DATA_PATH = 'data/'
 EMBEDDING_DIR = 'data/fasttext'
 
-MAX_NB_WORDS = 25
+MAX_NB_WORDS = 100
 tokenizer = RegexpTokenizer(r'\w+')
 stop_words = set(stopwords.words('english'))
 stop_words.update(['.', ',', '"', "'", ':', ';', '(', ')', '[', ']', '{', '}'])
@@ -89,9 +52,6 @@ def normalize(s):
     s = s.replace('8', ' eight ')
     s = s.replace('9', ' nine ')
     return s
-
-from subprocess import check_output
-print(check_output(["ls", "data"]).decode("utf8"))
 
 
 
@@ -163,11 +123,6 @@ print(y_test)
 
 
 
-
-
-
-
-
 #load embeddings
 print('loading word embeddings...')
 embeddings_index = {}
@@ -183,7 +138,7 @@ print('found %s word vectors' % len(embeddings_index))
 
 #training params
 batch_size = 2
-num_epochs = 50
+num_epochs = 8
 
 #model parameters
 embed_dim = 300
