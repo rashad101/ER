@@ -133,7 +133,7 @@ def build_data():
             relation_set.add(rel['rel'])
 
 
-        # get top 5 relations related to the entity from dbpedia relations which are extracted from dbpedia relations
+        # get top 5 relations related to the entity from dbpedia relations
         relations_for_entity = get_relations(sub)
 
         similarity = []
